@@ -33,7 +33,7 @@ func (h *authLoginHandler) GetPath() string {
 func (h *authLoginHandler) Handle(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	rw.Header().Set("Content-Type", "application/json")
 
-	input := new(domain.UserInput)
+	input := new(domain.UserLoginInput)
 	if json.NewDecoder(r.Body).Decode(&input) != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(rw).Encode(domain.HttpResponse{

@@ -100,7 +100,7 @@ func (u *userUseCase) GetAllByPosition(ctx context.Context, lastPosition uint64,
 	return u.userRepo.GetAllByPosition(ctx, lastPosition, limit)
 }
 
-func (u *userUseCase) Create(ctx context.Context, user *domain.UserInput) (*domain.User, error) {
+func (u *userUseCase) Create(ctx context.Context, user *domain.UserCreateInput) (*domain.User, error) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
@@ -127,22 +127,16 @@ func (u *userUseCase) Create(ctx context.Context, user *domain.UserInput) (*doma
 	return nil, myErrors.ErrSomethingWentWrong
 }
 
-func (u *userUseCase) Update(ctx context.Context, input *domain.User) (*domain.User, error) {
+func (u *userUseCase) Update(ctx context.Context, input *domain.UserUpdateWithoutPasswordInput) (*domain.User, error) {
 
-	validate := domain.UserInput{
-		FirstName:  input.FirstName,
-		LastName:   input.LastName,
-		Email:      input.Email,
-		Additional: input.Additional,
-	}
-
-	if err := validate.ValidateWithoutPassword(); err != nil {
+	if err := input.Validate(); err != nil {
 		return nil, err
 	}
 
-	userExists, err := u.GetOneByID(ctx, input.ID)
+	userExists, err := u.userRepo.GetOneByID(ctx, input.ID)
+
 	if err != nil || userExists == nil {
-		return nil, myErrors.ErrNotFound
+		return nil, err
 	}
 
 	return u.userRepo.Update(ctx, input)

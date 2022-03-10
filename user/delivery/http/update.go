@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"udev21/auth/domain"
 	myHttpHandler "udev21/auth/domain/http/handler"
@@ -32,29 +33,26 @@ func (h *userUpdateHandler) GetPath() string {
 
 //implementation method Handle from interface IhttpHandler
 func (h *userUpdateHandler) Handle(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	res := new(domain.HttpResponse)
+	res.StatusCode = http.StatusBadRequest
+	res.Errors = myErrors.ErrInvalidInput
 
-	input := new(domain.User)
+	input := new(domain.UserUpdateWithoutPasswordInput)
 	if json.NewDecoder(r.Body).Decode(&input) != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(domain.HttpResponse{
-			StatusCode: http.StatusBadRequest,
-			Errors:     map[string]interface{}{"main": myErrors.ErrInvalidInput.Error()},
-		})
+		log.Println("222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222")
+		res.Write(rw)
 		return
 	}
 
 	user, err := h.usecase.Update(context.Background(), input)
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(domain.HttpResponse{
-			StatusCode: http.StatusBadRequest,
-			Errors:     map[string]interface{}{"main": err.Error()},
-		})
+		res.Errors = map[string]interface{}{"main": err.Error()}
+		res.Write(rw)
 		return
 	}
-	json.NewEncoder(rw).Encode(domain.HttpResponse{
-		StatusCode: http.StatusOK,
-		Body:       user,
-	})
+	res.StatusCode = http.StatusOK
+	res.Body = user
+	res.Errors = nil
+	res.Write(rw)
 	r.Body.Close()
 }

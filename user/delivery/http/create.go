@@ -26,29 +26,28 @@ func (h *userCreateHandler) GetPath() string {
 
 //implementation method Handle from interface IhttpHandler
 func (h *userCreateHandler) Handle(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	response := new(domain.HttpResponse)
+	input := new(domain.UserCreateInput)
 
-	input := new(domain.UserInput)
+	response.StatusCode = http.StatusBadRequest
+	response.Errors = myErrors.ErrInvalidInput
+
 	if json.NewDecoder(r.Body).Decode(&input) != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(domain.HttpResponse{
-			StatusCode: http.StatusBadRequest,
-			Errors:     map[string]interface{}{"main": myErrors.ErrInvalidInput.Error()},
-		})
+		response.Write(rw)
 		return
+	} else if input.Validate() != nil {
+		response.Write(rw)
 	}
 
 	user, err := h.usecase.Create(context.Background(), input)
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(domain.HttpResponse{
-			StatusCode: http.StatusBadRequest,
-			Errors:     map[string]interface{}{"main": err.Error()},
-		})
+		response.Errors = map[string]interface{}{"main": err.Error()}
+		response.Write(rw)
 		return
 	}
-	json.NewEncoder(rw).Encode(domain.HttpResponse{
-		StatusCode: http.StatusOK,
-		Body:       user,
-	})
+	response.StatusCode = http.StatusOK
+	response.Body = user
+	response.Errors = nil
+	response.Write(rw)
 	r.Body.Close()
 }

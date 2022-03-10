@@ -26,7 +26,7 @@ func NewAuthUseCase(userRepo domain.IUserRepository, jwtMakerUseCase domain.IJWT
 	}
 }
 
-func (u *authUseCase) Login(ctx context.Context, input domain.UserInput) (*domain.AuthJWT, error) {
+func (u *authUseCase) Login(ctx context.Context, input domain.UserLoginInput) (*domain.AuthJWT, error) {
 	if err := input.ValidateEmail(); err != nil {
 		return nil, myErrors.ErrNotFound
 	}
@@ -49,7 +49,7 @@ func (u *authUseCase) Login(ctx context.Context, input domain.UserInput) (*domai
 	return token, nil
 }
 
-func (u *authUseCase) Register(ctx context.Context, input domain.UserInput) (*domain.AuthJWT, error) {
+func (u *authUseCase) Register(ctx context.Context, input domain.UserCreateInput) (*domain.AuthJWT, error) {
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}

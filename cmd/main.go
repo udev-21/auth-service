@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 	authHttp "udev21/auth/auth/delivery/http"
@@ -22,37 +21,6 @@ import (
 
 	"github.com/jmoiron/sqlx"
 )
-
-var balancer = make(chan struct{}, 10)
-
-func greet(authUseCase domain.IAuthUseCase) func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		// userId := ps.ByName("user_id")
-		user, err := authUseCase.Login(r.Context(), domain.UserInput{
-			Email:    "udev21@gmail.com",
-			Password: "password",
-		})
-		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error()))
-			return
-		}
-		json.NewEncoder(w).Encode(user)
-	}
-}
-
-func basicMiddleware(next httprouter.Handle) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		w.Write([]byte("hello from basic middleware\n"))
-		next(w, r, ps)
-	}
-}
-func basicMiddleware2(next httprouter.Handle) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		w.Write([]byte("hello from basic middleware2\n"))
-		next(w, r, ps)
-	}
-}
 
 var salt = []byte("F4r(.BJfK+#V/9oI(h4@_)2.6Y4/x9Lh=Gf60qCQFv*O?sI:K*-S5+*0R7?RShBn")
 
@@ -107,6 +75,7 @@ func main() {
 	serviceOwnerMiddleware := middleware.NewAuthServiceOwnerMiddleware(jwtMakerUseCase, serviceOwnerUseCase, userUseCase)
 
 	authTestHandler.AddMiddleware(serviceOwnerMiddleware)
+	userUpdateHandler.AddMiddleware(serviceOwnerMiddleware)
 
 	util.RegisterHttpHandlerToRouter(router, authLoginHandler, authTestHandler, authRegisterHandler, authRefreshHandler, userUpdateHandler)
 

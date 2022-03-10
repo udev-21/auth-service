@@ -5,7 +5,7 @@ import (
 )
 
 type IAuthUseCase interface {
-	Login(ctx context.Context, input UserInput) (*AuthJWT, error)
-	Register(ctx context.Context, input UserInput) (*AuthJWT, error)
+	Login(ctx context.Context, input UserLoginInput) (*AuthJWT, error)
+	Register(ctx context.Context, input UserCreateInput) (*AuthJWT, error)
 	RefreshToken(ctx context.Context, input AuthJWT) (*AuthJWT, error)
 }

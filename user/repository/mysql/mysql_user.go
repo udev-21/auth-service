@@ -15,8 +15,28 @@ type mysqlUserRepository struct {
 	db *sqlx.DB
 }
 
-func New(db *sqlx.DB) *mysqlUserRepository {
+func New(db *sqlx.DB) domain.IUserRepository {
 	return &mysqlUserRepository{db: db}
+}
+
+func (u *mysqlUserRepository) GetOneByID(ctx context.Context, userId string) (*domain.User, error) {
+	if len(userId) < 32 {
+		return nil, myErrors.ErrNotFound
+	}
+
+	sql, args, err := sqb.Select("*").From(domain.User{}.GetMysqlTableName()).Where(sqb.Eq{"id": userId}).Where(sqb.Eq{"deleted_at": nil}).ToSql()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var user domain.User
+
+	err = u.db.GetContext(ctx, &user, sql, args...)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
 
 func (u *mysqlUserRepository) GetAllByByID(ctx context.Context, userIds []string) ([]domain.User, error) {
@@ -127,26 +147,38 @@ func (u *mysqlUserRepository) Create(ctx context.Context, user *domain.User) (*d
 	}
 }
 
-func (u *mysqlUserRepository) Update(ctx context.Context, user *domain.User) (*domain.User, error) {
-	res, err := sqb.Update(domain.User{}.GetMysqlTableName()).
-		Set("email", user.Email).
-		Set("first_name", user.FirstName).
-		Set("last_name", user.LastName).
-		Set("additional", user.Additional).
-		Where(sqb.Eq{"id": user.ID}).
-		RunWith(u.db).
-		ExecContext(ctx)
+func (u *mysqlUserRepository) Update(ctx context.Context, user *domain.UserUpdateWithoutPasswordInput) (*domain.User, error) {
+	if err := user.Validate(); err != nil {
+		return nil, err
+	}
+
+	res := sqb.Update(user.GetMysqlTableName()).Where(sqb.Eq{"id": user.ID})
+	if user.Email != nil {
+		res = res.Set("email", user.Email)
+	}
+	if user.FirstName != nil {
+		res = res.Set("first_name", user.FirstName)
+	}
+	if user.LastName != nil {
+		res = res.Set("last_name", user.LastName)
+	}
+	if user.Additional != nil {
+		res = res.Set("additional", user.Additional)
+	}
+
+	update, err := res.RunWith(u.db).ExecContext(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if rows, err := res.RowsAffected(); err != nil {
+	if rows, err := update.RowsAffected(); err != nil {
 		return nil, err
 	} else if rows == 0 {
 		return nil, myErrors.ErrNotUpdated
 	}
-	return u.GetOneByPosition(ctx, uint64(user.Position))
+
+	return u.GetOneByID(ctx, user.ID)
 }
 
 func (u *mysqlUserRepository) UpdatePassword(ctx context.Context, user *domain.User) error {

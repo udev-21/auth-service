@@ -2,6 +2,7 @@ package base
 
 import (
 	"time"
+	myErrors "udev21/auth/error"
 )
 
 type Model struct {
@@ -13,4 +14,12 @@ type Model struct {
 	UpdatedBy *string    `json:"updated_by" db:"updated_by"`
 	DeletedBy *string    `json:"deleted_by" db:"deleted_by"`
 	Position  int64      `json:"-" db:"position"`
+}
+
+func (m Model) ValidateID() error {
+	if len(m.ID) < 32 {
+		return myErrors.ErrInvalidID
+	}
+
+	return nil
 }
