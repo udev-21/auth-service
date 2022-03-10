@@ -8,7 +8,7 @@ import (
 	authUsecase "udev21/auth/auth/usecase"
 	"udev21/auth/delivery/http/middleware"
 	"udev21/auth/domain"
-	jwtUseCase "udev21/auth/jwt_maker/usecase"
+	jwtMakerUsecase "udev21/auth/jwt_maker/usecase"
 	passwordUseCase "udev21/auth/password_hash/usecase"
 	serviceOwnerRepo "udev21/auth/service_owner/repository"
 	serviceOwnerUseCase "udev21/auth/service_owner/usecase"
@@ -63,7 +63,7 @@ func main() {
 	conn.SetConnMaxLifetime(time.Minute)
 	conn.SetMaxOpenConns(10)
 	conn.SetMaxIdleConns(10)
-	userRepo := mysql.NewMysqlUserRepository(conn)
+	userRepo := mysql.New(conn)
 
 	jwtConfig := domain.JWTConfig{
 		SecretKey:                  salt,
@@ -71,7 +71,7 @@ func main() {
 		RefreshTokenExpireDuration: time.Hour * 24 * 7,
 	}
 
-	jwtMakerUseCase, err := jwtUseCase.NewJWTMakerUseCase(jwtConfig)
+	jwtMakerUseCase, err := jwtMakerUsecase.New(jwtConfig)
 	if err != nil {
 		panic(err)
 	}
@@ -86,11 +86,11 @@ func main() {
 		},
 	}
 
-	passwordHashUseCase := passwordUseCase.NewPasswordHashUseCase(passwordConfig)
+	passwordHashUseCase := passwordUseCase.New(passwordConfig)
 
 	authUseCase := authUsecase.NewAuthUseCase(userRepo, jwtMakerUseCase, passwordHashUseCase)
 
-	userUseCase := userUsecase.NewUserUsecase(userRepo, passwordHashUseCase)
+	userUseCase := userUsecase.New(userRepo, passwordHashUseCase)
 
 	router := httprouter.New()
 	authLoginHandler := authHttp.NewAuthLoginHandler(authUseCase)

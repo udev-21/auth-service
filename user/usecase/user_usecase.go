@@ -14,7 +14,7 @@ type userUseCase struct {
 	passwordHashUseCase domain.IPasswordHashUseCase
 }
 
-func NewUserUsecase(u domain.IUserRepository, p domain.IPasswordHashUseCase) domain.IUserUseCase {
+func New(u domain.IUserRepository, p domain.IPasswordHashUseCase) domain.IUserUseCase {
 	return &userUseCase{
 		userRepo:            u,
 		passwordHashUseCase: p,

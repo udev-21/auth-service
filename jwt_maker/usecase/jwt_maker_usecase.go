@@ -16,7 +16,7 @@ type jwtMakerUseCase struct {
 
 const minSecretKeySize = 32
 
-func NewJWTMakerUseCase(config domain.JWTConfig) (domain.IJWTMakerUseCase, error) {
+func New(config domain.JWTConfig) (domain.IJWTMakerUseCase, error) {
 	if len(config.SecretKey) < minSecretKeySize {
 		return nil, fmt.Errorf("invalid key size: must be at least %d characters", minSecretKeySize)
 	}

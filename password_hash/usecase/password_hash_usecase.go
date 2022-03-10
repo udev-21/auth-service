@@ -11,7 +11,7 @@ type passwordHashUseCase struct {
 	config domain.PasswordConfig
 }
 
-func NewPasswordHashUseCase(config domain.PasswordConfig) domain.IPasswordHashUseCase {
+func New(config domain.PasswordConfig) domain.IPasswordHashUseCase {
 	return &passwordHashUseCase{
 		config: config,
 	}
