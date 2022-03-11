@@ -32,7 +32,7 @@ func (a *User) ValidateFirstName() error {
 	if a.FirstName != nil {
 		*a.FirstName = strings.TrimSpace(*a.FirstName)
 		if *a.FirstName == "" {
-			return myErrors.ErrInvalidInput
+			return myErrors.ErrInvalidValue
 		}
 	}
 	return nil
@@ -42,7 +42,7 @@ func (a *User) ValidateAdditional() error {
 	if a.Additional != nil {
 		*a.Additional = strings.TrimSpace(*a.Additional)
 		if *a.Additional == "" {
-			return myErrors.ErrInvalidInput
+			return myErrors.ErrInvalidValue
 		}
 	}
 	return nil
@@ -52,7 +52,7 @@ func (a *User) ValidateLastName() error {
 	if a.LastName != nil {
 		*a.LastName = strings.TrimSpace(*a.LastName)
 		if *a.LastName == "" {
-			return myErrors.ErrInvalidInput
+			return myErrors.ErrInvalidValue
 		}
 	}
 	return nil

@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"regexp"
+	"udev21/auth/config"
 	"udev21/auth/domain"
 	"udev21/auth/domain/http/handler"
 	myErrors "udev21/auth/error"
@@ -45,7 +46,7 @@ func (m *authUserMiddleware) Handle(next httprouter.Handle) httprouter.Handle {
 				return
 			}
 
-			r = r.WithContext(context.WithValue(r.Context(), domain.ContextUserKey, authUser))
+			r = r.WithContext(context.WithValue(r.Context(), config.ContextUserKey, authUser))
 			next(w, r, p)
 			return
 		}

@@ -26,7 +26,8 @@ var (
 	ErrNotDeleted   = NewError(errors.New("not deleted"))
 	ErrInvalidID    = NewError(errors.New("invalid id"))
 
-	ErrObjectNil = NewError(errors.New("object is nil"))
+	ErrObjectNil    = NewError(errors.New("object is nil"))
+	ErrInvalidValue = NewError(errors.New("invalid value"))
 
 	ErrSomethingWentWrong = NewError(errors.New("something went wrong"))
 	ErrEmailAlreadyExists = NewError(errors.New("email already exists"))

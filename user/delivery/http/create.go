@@ -13,7 +13,13 @@ import (
 
 type userCreateHandler struct {
 	myHttpHandler.HttpHandler
-	usecase domain.IUserUseCase
+	userUseCase domain.IUserUseCase
+}
+
+func NewUserCreateHandler(userUseCase domain.IUserUseCase) myHttpHandler.IhttpHandler {
+	return &userCreateHandler{
+		userUseCase: userUseCase,
+	}
 }
 
 func (h *userCreateHandler) GetMethod() string {
@@ -39,12 +45,13 @@ func (h *userCreateHandler) Handle(rw http.ResponseWriter, r *http.Request, p ht
 		response.Write(rw)
 	}
 
-	user, err := h.usecase.Create(context.Background(), input)
+	user, err := h.userUseCase.Create(context.Background(), input)
 	if err != nil {
 		response.Errors = map[string]interface{}{"main": err.Error()}
 		response.Write(rw)
 		return
 	}
+
 	response.StatusCode = http.StatusOK
 	response.Body = user
 	response.Errors = nil

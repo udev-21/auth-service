@@ -2,16 +2,17 @@ package usecase
 
 import (
 	"encoding/hex"
+	"udev21/auth/config"
 	"udev21/auth/domain"
 
 	"golang.org/x/crypto/argon2"
 )
 
 type passwordHashUseCase struct {
-	config domain.PasswordConfig
+	config config.PasswordConfig
 }
 
-func New(config domain.PasswordConfig) domain.IPasswordHashUseCase {
+func New(config config.PasswordConfig) domain.IPasswordHashUseCase {
 	return &passwordHashUseCase{
 		config: config,
 	}

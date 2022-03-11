@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"udev21/auth/config"
 	"udev21/auth/domain"
 	myErrors "udev21/auth/error"
 
@@ -11,12 +12,12 @@ import (
 )
 
 type jwtMakerUseCase struct {
-	config domain.JWTConfig
+	config config.JWTConfig
 }
 
 const minSecretKeySize = 32
 
-func New(config domain.JWTConfig) (domain.IJWTMakerUseCase, error) {
+func New(config config.JWTConfig) (domain.IJWTMakerUseCase, error) {
 	if len(config.SecretKey) < minSecretKeySize {
 		return nil, fmt.Errorf("invalid key size: must be at least %d characters", minSecretKeySize)
 	}

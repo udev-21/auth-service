@@ -2,6 +2,7 @@ package base
 
 import (
 	"time"
+	"udev21/auth/config"
 	myErrors "udev21/auth/error"
 )
 
@@ -17,7 +18,7 @@ type Model struct {
 }
 
 func (m Model) ValidateID() error {
-	if len(m.ID) < 32 {
+	if len(m.ID) < config.DBTableIDKeyLength {
 		return myErrors.ErrInvalidID
 	}
 

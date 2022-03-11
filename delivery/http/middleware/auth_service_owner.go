@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"udev21/auth/config"
 	"udev21/auth/domain"
 	"udev21/auth/domain/http/handler"
 
@@ -53,7 +54,7 @@ func (m *authServiceOwnerMiddleware) Handle(next httprouter.Handle) httprouter.H
 				return
 			}
 
-			r = r.WithContext(context.WithValue(r.Context(), domain.ContextServiceOwnerUserKey, user))
+			r = r.WithContext(context.WithValue(r.Context(), config.ContextServiceOwnerUserKey, user))
 			next(w, r, p)
 			return
 		}

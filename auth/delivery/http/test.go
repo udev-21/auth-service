@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"udev21/auth/config"
 	"udev21/auth/domain"
 	myHttpHandler "udev21/auth/domain/http/handler"
 
@@ -26,7 +27,7 @@ func (h *authTestHandler) GetPath() string {
 }
 
 func (h *authTestHandler) Handle(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	if user, ok := r.Context().Value(domain.ContextUserKey).(*domain.User); ok {
+	if user, ok := r.Context().Value(config.ContextUserKey).(*domain.User); ok {
 		json.NewEncoder(rw).Encode(domain.HttpResponse{
 			StatusCode: http.StatusOK,
 			Body:       user,

@@ -5,8 +5,8 @@ import (
 	"time"
 	authHttp "udev21/auth/auth/delivery/http"
 	authUsecase "udev21/auth/auth/usecase"
+	"udev21/auth/config"
 	"udev21/auth/delivery/http/middleware"
-	"udev21/auth/domain"
 	jwtMakerUsecase "udev21/auth/jwt_maker/usecase"
 	passwordUseCase "udev21/auth/password_hash/usecase"
 	serviceOwnerRepo "udev21/auth/service_owner/repository"
@@ -33,7 +33,7 @@ func main() {
 	conn.SetMaxIdleConns(10)
 	userRepo := mysql.New(conn)
 
-	jwtConfig := domain.JWTConfig{
+	jwtConfig := config.JWTConfig{
 		SecretKey:                  salt,
 		AccessTokenExpireDuration:  time.Minute * 15,
 		RefreshTokenExpireDuration: time.Hour * 24 * 7,
@@ -44,9 +44,9 @@ func main() {
 		panic(err)
 	}
 
-	passwordConfig := domain.PasswordConfig{
+	passwordConfig := config.PasswordConfig{
 		Salt: salt,
-		Argon: domain.ArgonEncodeConfig{
+		Argon: config.ArgonEncodeConfig{
 			Time:      2,
 			Memory:    16 * 1024,
 			Threads:   1,
@@ -67,7 +67,10 @@ func main() {
 	authRefreshHandler := authHttp.NewAuthRefreshTokenHandler(authUseCase)
 
 	userUpdateHandler := userHttp.NewUserUpdateHandler(userUseCase)
-	// authMiddleware := middleware.NewAuthUserMiddleware(jwtMakerUseCase, userUseCase)
+	userCreateHandler := userHttp.NewUserCreateHandler(userUseCase)
+	userGetHandler := userHttp.NewUserGetHandler()
+	authMiddleware := middleware.NewAuthUserMiddleware(jwtMakerUseCase, userUseCase)
+	userGetHandler.AddMiddleware(authMiddleware)
 
 	serviceOwnerRepo := serviceOwnerRepo.New(conn)
 	serviceOwnerUseCase := serviceOwnerUseCase.New(serviceOwnerRepo)
@@ -76,8 +79,9 @@ func main() {
 
 	authTestHandler.AddMiddleware(serviceOwnerMiddleware)
 	userUpdateHandler.AddMiddleware(serviceOwnerMiddleware)
+	userCreateHandler.AddMiddleware(serviceOwnerMiddleware)
 
-	util.RegisterHttpHandlerToRouter(router, authLoginHandler, authTestHandler, authRegisterHandler, authRefreshHandler, userUpdateHandler)
+	util.RegisterHttpHandlerToRouter(router, authLoginHandler, authTestHandler, authRegisterHandler, authRefreshHandler, userUpdateHandler, userGetHandler, userCreateHandler)
 
 	http.ListenAndServe(":8080", router)
 

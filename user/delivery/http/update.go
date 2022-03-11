@@ -3,7 +3,6 @@ package http
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 	"udev21/auth/domain"
 	myHttpHandler "udev21/auth/domain/http/handler"
@@ -14,12 +13,12 @@ import (
 
 type userUpdateHandler struct {
 	myHttpHandler.HttpHandler
-	usecase domain.IUserUseCase
+	userUseCase domain.IUserUseCase
 }
 
-func NewUserUpdateHandler(usecase domain.IUserUseCase) myHttpHandler.IhttpHandler {
+func NewUserUpdateHandler(userUseCase domain.IUserUseCase) myHttpHandler.IhttpHandler {
 	return &userUpdateHandler{
-		usecase: usecase,
+		userUseCase: userUseCase,
 	}
 }
 
@@ -31,7 +30,6 @@ func (h *userUpdateHandler) GetPath() string {
 	return "/user"
 }
 
-//implementation method Handle from interface IhttpHandler
 func (h *userUpdateHandler) Handle(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	res := new(domain.HttpResponse)
 	res.StatusCode = http.StatusBadRequest
@@ -39,12 +37,11 @@ func (h *userUpdateHandler) Handle(rw http.ResponseWriter, r *http.Request, p ht
 
 	input := new(domain.UserUpdateWithoutPasswordInput)
 	if json.NewDecoder(r.Body).Decode(&input) != nil {
-		log.Println("222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222")
 		res.Write(rw)
 		return
 	}
 
-	user, err := h.usecase.Update(context.Background(), input)
+	user, err := h.userUseCase.Update(context.Background(), input)
 	if err != nil {
 		res.Errors = map[string]interface{}{"main": err.Error()}
 		res.Write(rw)
