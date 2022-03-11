@@ -39,7 +39,7 @@ func (u *mysqlUserRepository) GetOneByID(ctx context.Context, userId string) (*d
 	return &user, nil
 }
 
-func (u *mysqlUserRepository) GetAllByByID(ctx context.Context, userIds []string) ([]domain.User, error) {
+func (u *mysqlUserRepository) GetAllByID(ctx context.Context, userIds []string) ([]domain.User, error) {
 	if len(userIds) == 0 {
 		return nil, myErrors.ErrNotFound
 	}
@@ -57,7 +57,7 @@ func (u *mysqlUserRepository) GetAllByByID(ctx context.Context, userIds []string
 	return user, nil
 }
 
-func (u *mysqlUserRepository) GetAllByByEmail(ctx context.Context, userEmails []string) ([]domain.User, error) {
+func (u *mysqlUserRepository) GetAllByEmail(ctx context.Context, userEmails []string) ([]domain.User, error) {
 	if len(userEmails) == 0 {
 		return nil, myErrors.ErrNotFound
 	}

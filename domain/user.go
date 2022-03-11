@@ -81,9 +81,9 @@ type IUserUseCase interface {
 
 type IUserRepository interface {
 	GetAllByPosition(ctx context.Context, lastPosition uint64, limit uint16) ([]User, error)
-	GetAllByByID(ctx context.Context, userIds []string) ([]User, error)
+	GetAllByID(ctx context.Context, userIds []string) ([]User, error)
 	GetOneByID(ctx context.Context, userId string) (*User, error)
-	GetAllByByEmail(ctx context.Context, userEmails []string) ([]User, error)
+	GetAllByEmail(ctx context.Context, userEmails []string) ([]User, error)
 	GetAllByEmailLike(ctx context.Context, email string, offset int64, limit uint16) ([]User, error)
 	GetOneByPosition(ctx context.Context, position uint64) (*User, error)
 	GetOneByEmail(ctx context.Context, email string) (*User, error)

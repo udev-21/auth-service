@@ -34,3 +34,19 @@ func (r *serviceOwnerRepository) GetServiceOwnerByID(ctx context.Context, id str
 
 	return &serviceOwner, nil
 }
+
+func (r *serviceOwnerRepository) HasUser(ctx context.Context, ownerUser, user *domain.User) (bool, error) {
+
+	/*
+		SELECT EXISTS(
+			SELECT 1
+			FROM service_owners
+			JOIN services ON service_owners.service_id = services.id
+			JOIN service_users ON service_users.service_id = services.id AND service_users.user_id = ?
+			WHERE service_owners.user_id = ?
+		)
+
+	*/
+
+	return false, nil
+}

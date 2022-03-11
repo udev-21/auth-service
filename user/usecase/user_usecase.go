@@ -26,7 +26,7 @@ func (u *userUseCase) GetOneByID(ctx context.Context, id string) (*domain.User, 
 		return nil, myErrors.ErrNotFound
 	}
 
-	users, err := u.userRepo.GetAllByByID(ctx, []string{id})
+	users, err := u.userRepo.GetAllByID(ctx, []string{id})
 
 	if len(users) == 0 {
 		return nil, myErrors.ErrNotFound
@@ -41,7 +41,7 @@ func (u *userUseCase) GetOneByEmail(ctx context.Context, email string) (*domain.
 	if len(email) < 3 {
 		return nil, myErrors.ErrNotFound
 	}
-	users, err := u.userRepo.GetAllByByEmail(ctx, []string{email})
+	users, err := u.userRepo.GetAllByEmail(ctx, []string{email})
 	if len(users) == 0 {
 		return nil, myErrors.ErrNotFound
 	} else if err != nil {
@@ -55,7 +55,7 @@ func (u *userUseCase) GetOneByAuthJWTPayload(ctx context.Context, payload *domai
 		return nil, myErrors.ErrNotFound
 	}
 
-	users, err := u.userRepo.GetAllByByID(ctx, []string{payload.UserID})
+	users, err := u.userRepo.GetAllByID(ctx, []string{payload.UserID})
 
 	if len(users) == 0 {
 		return nil, myErrors.ErrNotFound
@@ -70,7 +70,7 @@ func (u *userUseCase) GetAllByID(ctx context.Context, userIds []string) ([]domai
 	if len(userIds) < 1 {
 		return []domain.User{}, nil
 	}
-	return u.userRepo.GetAllByByID(ctx, userIds)
+	return u.userRepo.GetAllByID(ctx, userIds)
 }
 
 func (u *userUseCase) GetAllEmailStartsWith(ctx context.Context, email string, offset int64, limit uint16) ([]domain.User, error) {

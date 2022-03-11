@@ -9,6 +9,8 @@ import (
 	"udev21/auth/delivery/http/middleware"
 	jwtMakerUsecase "udev21/auth/jwt_maker/usecase"
 	passwordUseCase "udev21/auth/password_hash/usecase"
+	serviceRepo "udev21/auth/service/repository"
+	serviceOwnerHttp "udev21/auth/service_owner/delivery/http"
 	serviceOwnerRepo "udev21/auth/service_owner/repository"
 	serviceOwnerUseCase "udev21/auth/service_owner/usecase"
 	userHttp "udev21/auth/user/delivery/http"
@@ -31,8 +33,6 @@ func main() {
 	conn.SetConnMaxLifetime(time.Minute)
 	conn.SetMaxOpenConns(10)
 	conn.SetMaxIdleConns(10)
-	userRepo := mysql.New(conn)
-
 	jwtConfig := config.JWTConfig{
 		SecretKey:                  salt,
 		AccessTokenExpireDuration:  time.Minute * 15,
@@ -54,34 +54,43 @@ func main() {
 		},
 	}
 
+	//repos
+	userRepo := mysql.New(conn)
+	serviceOwnerRepo := serviceOwnerRepo.New(conn)
+	serviceRepo := serviceRepo.New(conn)
+	//usecases
 	passwordHashUseCase := passwordUseCase.New(passwordConfig)
-
 	authUseCase := authUsecase.NewAuthUseCase(userRepo, jwtMakerUseCase, passwordHashUseCase)
-
 	userUseCase := userUsecase.New(userRepo, passwordHashUseCase)
+	serviceOwnerUseCase := serviceOwnerUseCase.New(serviceOwnerRepo, serviceRepo)
 
+	//handlers
 	router := httprouter.New()
+
 	authLoginHandler := authHttp.NewAuthLoginHandler(authUseCase)
 	authRegisterHandler := authHttp.NewAuthRegisterHandler(authUseCase)
 	authTestHandler := authHttp.NewAuthTestHandler(authUseCase)
 	authRefreshHandler := authHttp.NewAuthRefreshTokenHandler(authUseCase)
+	createServiceHandler := serviceOwnerHttp.New(serviceOwnerUseCase)
+	getServicesHandler := serviceOwnerHttp.NewGetServiceHandler(serviceOwnerUseCase)
 
 	userUpdateHandler := userHttp.NewUserUpdateHandler(userUseCase)
 	userCreateHandler := userHttp.NewUserCreateHandler(userUseCase)
 	userGetHandler := userHttp.NewUserGetHandler()
+
+	//middlewares
+
 	authMiddleware := middleware.NewAuthUserMiddleware(jwtMakerUseCase, userUseCase)
 	userGetHandler.AddMiddleware(authMiddleware)
 
-	serviceOwnerRepo := serviceOwnerRepo.New(conn)
-	serviceOwnerUseCase := serviceOwnerUseCase.New(serviceOwnerRepo)
-
 	serviceOwnerMiddleware := middleware.NewAuthServiceOwnerMiddleware(jwtMakerUseCase, serviceOwnerUseCase, userUseCase)
-
 	authTestHandler.AddMiddleware(serviceOwnerMiddleware)
 	userUpdateHandler.AddMiddleware(serviceOwnerMiddleware)
 	userCreateHandler.AddMiddleware(serviceOwnerMiddleware)
+	createServiceHandler.AddMiddleware(serviceOwnerMiddleware)
+	getServicesHandler.AddMiddleware(serviceOwnerMiddleware)
 
-	util.RegisterHttpHandlerToRouter(router, authLoginHandler, authTestHandler, authRegisterHandler, authRefreshHandler, userUpdateHandler, userGetHandler, userCreateHandler)
+	util.RegisterHttpHandlerToRouter(router, authLoginHandler, authTestHandler, authRegisterHandler, authRefreshHandler, userUpdateHandler, userGetHandler, userCreateHandler, createServiceHandler, getServicesHandler)
 
 	http.ListenAndServe(":8080", router)
 
