@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS`users` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime ON UPDATE CURRENT_TIMESTAMP,
   `deleted_at` datetime,  
+  `created_by` char(36) DEFAULT NULL,
   `position` bigint AUTO_INCREMENT,
   `additional` json,
    KEY `position` (`position`)
@@ -19,7 +20,8 @@ CREATE TABLE if not exists `service_owners`  (
   `user_id` char(36) NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime ON UPDATE CURRENT_TIMESTAMP,
-  `deleted_at` datetime,  
+  `deleted_at` datetime,
+  `created_by` char(36) DEFAULT NULL,
   `position` bigint AUTO_INCREMENT,
    KEY `position` (`position`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -30,6 +32,7 @@ CREATE TABLE if not exists `services`  (
   `owner_id` char(36) NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `description` varchar(2048) DEFAULT NULL,
+  `created_by` char(36) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime ON UPDATE CURRENT_TIMESTAMP,
   `deleted_at` datetime,  
@@ -45,6 +48,7 @@ CREATE TABLE if not exists `service_users`  (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime ON UPDATE CURRENT_TIMESTAMP,
   `deleted_at` datetime,  
+  `created_by` char(36) DEFAULT NULL,
   `position` bigint AUTO_INCREMENT,
    KEY `position` (`position`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

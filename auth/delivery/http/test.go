@@ -35,5 +35,4 @@ func (h *authTestHandler) Handle(rw http.ResponseWriter, r *http.Request, p http
 	} else {
 		rw.Write([]byte("finally test"))
 	}
-
 }

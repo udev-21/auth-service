@@ -9,8 +9,9 @@ import (
 	"udev21/auth/delivery/http/middleware"
 	jwtMakerUsecase "udev21/auth/jwt_maker/usecase"
 	passwordUseCase "udev21/auth/password_hash/usecase"
+	serviceHttp "udev21/auth/service/delivery/http"
 	serviceRepo "udev21/auth/service/repository"
-	serviceOwnerHttp "udev21/auth/service_owner/delivery/http"
+	serviceUsecase "udev21/auth/service/usecase"
 	serviceOwnerRepo "udev21/auth/service_owner/repository"
 	serviceOwnerUseCase "udev21/auth/service_owner/usecase"
 	userHttp "udev21/auth/user/delivery/http"
@@ -63,6 +64,7 @@ func main() {
 	authUseCase := authUsecase.NewAuthUseCase(userRepo, jwtMakerUseCase, passwordHashUseCase)
 	userUseCase := userUsecase.New(userRepo, passwordHashUseCase)
 	serviceOwnerUseCase := serviceOwnerUseCase.New(serviceOwnerRepo, serviceRepo)
+	serviceUseCase := serviceUsecase.New(serviceRepo, userUseCase)
 
 	//handlers
 	router := httprouter.New()
@@ -71,11 +73,11 @@ func main() {
 	authRegisterHandler := authHttp.NewAuthRegisterHandler(authUseCase)
 	authTestHandler := authHttp.NewAuthTestHandler(authUseCase)
 	authRefreshHandler := authHttp.NewAuthRefreshTokenHandler(authUseCase)
-	createServiceHandler := serviceOwnerHttp.New(serviceOwnerUseCase)
-	getServicesHandler := serviceOwnerHttp.NewGetServiceHandler(serviceOwnerUseCase)
+	createServiceHandler := serviceHttp.New(serviceUseCase)
+	getServicesHandler := serviceHttp.NewGetServiceHandler(serviceUseCase)
 
 	userUpdateHandler := userHttp.NewUserUpdateHandler(userUseCase)
-	userCreateHandler := userHttp.NewUserCreateHandler(userUseCase)
+	userCreateHandler := serviceHttp.NewServiceUserCreateHandler(serviceUseCase, serviceOwnerUseCase, userUseCase)
 	userGetHandler := userHttp.NewUserGetHandler()
 
 	//middlewares

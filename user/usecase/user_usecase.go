@@ -100,7 +100,7 @@ func (u *userUseCase) GetAllByPosition(ctx context.Context, lastPosition uint64,
 	return u.userRepo.GetAllByPosition(ctx, lastPosition, limit)
 }
 
-func (u *userUseCase) Create(ctx context.Context, user *domain.UserCreateInput) (*domain.User, error) {
+func (u *userUseCase) Create(ctx context.Context, user *domain.UserCreateInput, owner *domain.User) (*domain.User, error) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
@@ -109,14 +109,18 @@ func (u *userUseCase) Create(ctx context.Context, user *domain.UserCreateInput) 
 	if err == nil && userExists != nil {
 		return nil, myErrors.ErrEmailAlreadyExists
 	} else if err != nil && err == sql.ErrNoRows {
-
-		user, err := u.userRepo.Create(ctx, &domain.User{
+		input := domain.User{
 			Email:      user.Email,
 			FirstName:  user.FirstName,
 			LastName:   user.LastName,
 			Additional: user.Additional,
 			Password:   u.passwordHashUseCase.Hash(user.Password),
-		})
+		}
+		if owner != nil {
+			input.CreatedBy = &owner.ID
+		}
+
+		user, err := u.userRepo.Create(ctx, &input)
 
 		if err != nil {
 			return nil, myErrors.ErrSomethingWentWrong

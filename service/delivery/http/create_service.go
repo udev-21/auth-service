@@ -1,9 +1,9 @@
 package http
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
+	"udev21/auth/config"
 	"udev21/auth/domain"
 	myHttpHandler "udev21/auth/domain/http/handler"
 	myErrors "udev21/auth/error"
@@ -11,29 +11,28 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-type userCreateHandler struct {
+type createServiceHandler struct {
 	myHttpHandler.HttpHandler
-	userUseCase domain.IUserUseCase
+	serviceUseCase domain.IServiceUseCase
 }
 
-func NewUserCreateHandler(userUseCase domain.IUserUseCase) myHttpHandler.IhttpHandler {
-	return &userCreateHandler{
-		userUseCase: userUseCase,
+func New(serviceUseCase domain.IServiceUseCase) myHttpHandler.IhttpHandler {
+	return &createServiceHandler{
+		serviceUseCase: serviceUseCase,
 	}
 }
 
-func (h *userCreateHandler) GetMethod() string {
+func (h *createServiceHandler) GetMethod() string {
 	return http.MethodPost
 }
 
-func (h *userCreateHandler) GetPath() string {
-	return "/user"
+func (h *createServiceHandler) GetPath() string {
+	return "/service"
 }
 
-//implementation method Handle from interface IhttpHandler
-func (h *userCreateHandler) Handle(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (h *createServiceHandler) Handle(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	response := new(domain.HttpResponse)
-	input := new(domain.UserCreateInput)
+	input := new(domain.ServiceCreateInput)
 
 	response.StatusCode = http.StatusBadRequest
 	response.Errors = myErrors.ErrInvalidInput
@@ -43,9 +42,17 @@ func (h *userCreateHandler) Handle(rw http.ResponseWriter, r *http.Request, p ht
 		return
 	} else if input.Validate() != nil {
 		response.Write(rw)
+		return
 	}
 
-	user, err := h.userUseCase.Create(context.Background(), input)
+	owner, ok := r.Context().Value(config.ContextServiceOwnerUserKey).(*domain.User)
+	if !ok {
+		response.Write(rw)
+		return
+	}
+
+	service, err := h.serviceUseCase.CreateService(r.Context(), owner, input)
+
 	if err != nil {
 		response.Errors = map[string]interface{}{"main": err.Error()}
 		response.Write(rw)
@@ -53,7 +60,7 @@ func (h *userCreateHandler) Handle(rw http.ResponseWriter, r *http.Request, p ht
 	}
 
 	response.StatusCode = http.StatusOK
-	response.Body = user
+	response.Body = service
 	response.Errors = nil
 	response.Write(rw)
 	r.Body.Close()

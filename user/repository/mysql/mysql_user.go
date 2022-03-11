@@ -132,14 +132,12 @@ func (u *mysqlUserRepository) GetAllByPosition(ctx context.Context, lastPosition
 
 func (u *mysqlUserRepository) Create(ctx context.Context, user *domain.User) (*domain.User, error) {
 	res, err := sqb.Insert(domain.User{}.GetMysqlTableName()).
-		Columns("email", "first_name", "last_name", "password", "additional").
-		Values(user.Email, user.FirstName, user.LastName, user.Password, user.Additional).
+		Columns("email", "first_name", "last_name", "password", "additional", "created_by").
+		Values(user.Email, user.FirstName, user.LastName, user.Password, user.Additional, user.CreatedBy).
 		RunWith(u.db).ExecContext(ctx)
-
 	if err != nil {
 		return nil, err
 	}
-
 	if lastid, err := res.LastInsertId(); err != nil {
 		return nil, myErrors.ErrSomethingWentWrong
 	} else {

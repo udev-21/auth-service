@@ -52,6 +52,14 @@ func (u *serviceOwnerUseCase) GetServices(ctx context.Context, owner *domain.Use
 	return u.serviceRepo.GetAllServiceByOwnerID(ctx, owner.ID)
 }
 
+func (u *serviceOwnerUseCase) HasService(ctx context.Context, user *domain.User, service *domain.Service) (bool, error) {
+	ok, err := u.IsServiceOwner(ctx, user)
+	if err != nil || !ok {
+		return false, myErrors.ErrNotFound
+	}
+	return u.serviceOwnerRepo.HasService(ctx, user, service)
+}
+
 // func (r *serviceOwnerUseCase) HasUser(ctx context.Context, ownerUser, user *domain.User) (bool, error) {
 // 	// return r.serviceOwnerRepo.HasUser(ctx, ownerUser, user)
 // }

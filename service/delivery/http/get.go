@@ -12,12 +12,12 @@ import (
 
 type getServiceHandler struct {
 	myHttpHandler.HttpHandler
-	serviceOwnerUseCase domain.IServiceOwnerUseCase
+	serviceUseCase domain.IServiceUseCase
 }
 
-func NewGetServiceHandler(serviceOwnerUseCase domain.IServiceOwnerUseCase) myHttpHandler.IhttpHandler {
+func NewGetServiceHandler(serviceUseCase domain.IServiceUseCase) myHttpHandler.IhttpHandler {
 	return &getServiceHandler{
-		serviceOwnerUseCase: serviceOwnerUseCase,
+		serviceUseCase: serviceUseCase,
 	}
 }
 
@@ -41,7 +41,7 @@ func (h *getServiceHandler) Handle(rw http.ResponseWriter, r *http.Request, p ht
 		return
 	}
 
-	services, err := h.serviceOwnerUseCase.GetServices(r.Context(), owner)
+	services, err := h.serviceUseCase.GetServicesByOwner(r.Context(), owner)
 
 	if err != nil {
 		response.Errors = map[string]interface{}{"main": err.Error()}

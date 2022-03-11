@@ -73,7 +73,7 @@ type IUserUseCase interface {
 	GetAllEmailStartsWith(ctx context.Context, email string, offset int64, limit uint16) ([]User, error)
 	GetAllEmailLike(ctx context.Context, email string, offset int64, limit uint16) ([]User, error)
 
-	Create(ctx context.Context, input *UserCreateInput) (*User, error)
+	Create(ctx context.Context, input *UserCreateInput, createdBy *User) (*User, error)
 	Update(ctx context.Context, input *UserUpdateWithoutPasswordInput) (*User, error)
 	// Delete(ctx context.Context, userIds []string) error
 	// DeleteAll(ctx context.Context, users []User) error

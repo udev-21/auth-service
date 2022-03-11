@@ -32,6 +32,7 @@ func (m *jwtMakerUseCase) VerifyToken(ctx context.Context, token string) (*domai
 		if !ok {
 			return nil, myErrors.ErrInvalidToken
 		}
+
 		return m.config.SecretKey, nil
 	}
 
@@ -73,13 +74,12 @@ func (m *jwtMakerUseCase) CreateToken(ctx context.Context, userId string) (*doma
 
 func (m *jwtMakerUseCase) createAccesToken(userId string) (string, error) {
 	accessPayload := domain.NewAuthJWTPayload(userId, m.config.AccessTokenExpireDuration)
-	accessJwt := jwt.NewWithClaims(jwt.SigningMethodHS256, accessPayload)
+	accessJwt := jwt.NewWithClaims(jwt.SigningMethodHS512, accessPayload)
 	return accessJwt.SignedString(m.config.SecretKey)
 }
 
 func (m *jwtMakerUseCase) createRefreshToken(userId string) (string, error) {
 	refreshPayload := domain.NewAuthJWTPayload(userId, m.config.RefreshTokenExpireDuration)
-	refreshJwt := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshPayload)
-
+	refreshJwt := jwt.NewWithClaims(jwt.SigningMethodHS512, refreshPayload)
 	return refreshJwt.SignedString(m.config.SecretKey)
 }

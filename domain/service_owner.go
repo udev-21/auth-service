@@ -16,14 +16,13 @@ func (s ServiceOwner) GetMysqlTableName() string {
 
 type IServiceOwnerUseCase interface {
 	IsServiceOwner(ctx context.Context, user *User) (bool, error)
-	CreateService(ctx context.Context, owner *User, service *ServiceCreateInput) (*Service, error)
-	GetServices(ctx context.Context, owner *User) ([]Service, error)
-	// AddExistingUserToService(ctx context.Context, user *User, service *Service) error
+	HasService(ctx context.Context, user *User, service *Service) (bool, error)
 	// HasUser(ctx context.Context, ownerUser, user *User) (bool, error)
 }
 
 type IServiceOwnerRepository interface {
 	GetServiceOwnerByID(ctx context.Context, id string) (*ServiceOwner, error)
+	HasService(ctx context.Context, user *User, service *Service) (bool, error)
 	// HasUser(ctx context.Context, ownerUser, user *User) (bool, error)
 
 }

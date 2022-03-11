@@ -46,15 +46,17 @@ func (s *Service) ValidateOwnerID() error {
 }
 
 type IServiceUseCase interface {
+	CreateService(ctx context.Context, owner *User, service *ServiceCreateInput) (*Service, error)
 	GetServiceByID(ctx context.Context, id string) (*Service, error)
-	CreateUser(ctx context.Context, user *UserCreateInput, service *Service) (*User, error)
+	GetServicesByOwner(ctx context.Context, owner *User) ([]Service, error)
+	AddExistingUserToService(ctx context.Context, user *User, service *Service) error
 }
 
 type IServiceRepository interface {
 	GetServiceByID(ctx context.Context, id string) (*Service, error)
 	GetAllServiceByOwnerID(ctx context.Context, ownerID string) ([]Service, error)
 	GetServiceByPosition(ctx context.Context, position uint64) (*Service, error)
-	// CreateUser(ctx context.Context, user *UserCreateInput, service *Service) (*User, error)
+	AddExistingUserToService(ctx context.Context, user *User, service *Service) error
 	Create(ctx context.Context, service *ServiceCreateInput) (*Service, error)
 }
 
@@ -64,4 +66,20 @@ type ServiceCreateInput struct {
 
 func (s *ServiceCreateInput) Validate() error {
 	return util.GetErrorIfExist(s.ValidateName, s.ValidateDescription)
+}
+
+type CreateServiceUserInput struct {
+	UserCreateInput
+	ServiceID string `json:"service_id"`
+}
+
+func (s *CreateServiceUserInput) ValidateServiceID() error {
+	if len(s.ServiceID) < config.DBTableIDKeyLength {
+		return myErrors.ErrInvalidValue
+	}
+	return nil
+}
+
+func (s *CreateServiceUserInput) Validate() error {
+	return util.GetErrorIfExist(s.ValidateServiceID, s.UserCreateInput.Validate)
 }

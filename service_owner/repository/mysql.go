@@ -35,6 +35,20 @@ func (r *serviceOwnerRepository) GetServiceOwnerByID(ctx context.Context, id str
 	return &serviceOwner, nil
 }
 
+func (r *serviceOwnerRepository) HasService(ctx context.Context, owner *domain.User, service *domain.Service) (bool, error) {
+	var serviceOwner domain.ServiceOwner
+
+	sql, args, err := sqb.Select("id").From(domain.Service{}.GetMysqlTableName()).Where(sqb.Eq{"owner_id": owner.ID}).Limit(1).ToSql()
+
+	if err != nil {
+		return false, err
+	}
+
+	err = r.db.GetContext(ctx, &serviceOwner, sql, args...)
+
+	return err == nil, err
+}
+
 func (r *serviceOwnerRepository) HasUser(ctx context.Context, ownerUser, user *domain.User) (bool, error) {
 
 	/*

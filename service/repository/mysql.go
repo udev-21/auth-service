@@ -76,7 +76,7 @@ func (s *serviceRepository) Create(ctx context.Context, service *domain.ServiceC
 }
 
 func (s *serviceRepository) GetAllServiceByOwnerID(ctx context.Context, ownerID string) ([]domain.Service, error) {
-	var services []domain.Service
+	var services = make([]domain.Service, 0)
 
 	sql, args, err := sqb.Select("*").From(domain.Service{}.GetMysqlTableName()).Where(sqb.Eq{"owner_id": ownerID}).ToSql()
 
@@ -91,4 +91,20 @@ func (s *serviceRepository) GetAllServiceByOwnerID(ctx context.Context, ownerID 
 	}
 
 	return services, nil
+}
+
+//AddExistingUserToService
+func (s *serviceRepository) AddExistingUserToService(ctx context.Context, user *domain.User, service *domain.Service) error {
+	sql, args, err := sqb.Insert(domain.ServiceUser{}.GetMysqlTableName()).Columns("user_id", "service_id").Values(user.ID, service.ID).ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	_, err = s.db.ExecContext(ctx, sql, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
